@@ -70,8 +70,7 @@ resources:
               Resource: !Sub 'arn:aws:s3:::${bucket}'
               Principal:
                 AWS: "arn:aws:iam::${AWS::AccountId}:root"
-              #Condition:  { "Null": { "aws:MultiFactorAuthAge": true }}
-    
+              #Condition:  { "Null": { "aws:MultiFactorAuthAge": true }}    
 
     bucketAccessPoint:
       Type: AWS::S3::AccessPoint
@@ -134,7 +133,8 @@ resources:
     cloudwatchDashboard:
       Type: AWS::CloudWatch::Dashboard
       Properties: 
-        DashboardBody: "${bucket}-dashboard"
+        DashboardBody: !Sub |
+                DASHBOARD_BODY
         DashboardName: "${bucket}-dashboard"
 
 
@@ -144,4 +144,8 @@ resources:
        Value: !GetAtt bucket.Arn
      IAMRole:
        Description: IAM Role for EC2 instances
-       Value: !Ref iamRole       
+       Value: !Ref iamRole
+    Dashboard:
+        Description: "Dashboard created to monitor Lambda function"
+        Value: !Sub |
+            "https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home#dashboards:name=${DashboardName}"       
