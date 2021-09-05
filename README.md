@@ -1,7 +1,7 @@
 # test-tetra
 Cloudformation exercise
 
-'''
+```
 Here is the Cloud Formation exercise which we would like Fabio to complete
 “Create an AWS cloud application packed in a cloudformation template, containing any  resources you think are needed.
 Requirements:
@@ -16,7 +16,7 @@ Requirements:
 5. For extra points: the bucket will automatically  be named ‘tetra-<candidate_first_name>-<dow>’ where dow is the day of the week at the time of stack deployment (ie - Monday). Hint - use a custom resource.
 6. For extra points: include in the template a cloudwatch graph showing the number of files processed.
 Note: The code submitted should be concise, commented and production ready.”
-'''
+```
 
 # tetra-lambda-transform
 
@@ -31,6 +31,9 @@ Fetching and transforming data from S3 using AWS Lambda is one of the most commo
 The deployment consists of a Lambda Function, IAM Role, Log Group, SNS, Custom Date Resource, Cloudwatch dashboard, S3 Bucket and Access Points.
 
 Deployment uses [The Serverless Framework](https://serverless.com).
+```
+curl -o- -L https://slss.io/install | bash
+```
 
 ```
 npx serverless deploy
