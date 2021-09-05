@@ -36,10 +36,11 @@ curl -o- -L https://slss.io/install | bash
 ```
 
 ```
+npm install
 npx serverless deploy
 ```
 
-The bucket name and Lambda access point names are generated based on the candidate name and day of the week.
+The bucket name and the notification email are set as parameters
 
 ```
 export candidate_name=fabio

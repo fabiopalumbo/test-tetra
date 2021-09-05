@@ -61,21 +61,17 @@ resources:
       Properties:
         Bucket: !Ref bucket
         PolicyDocument:
-          Id: MFA
+          Id: Allow
           Version: "2012-10-17"
           Statement:
             - Sid: MFAOnlyAccess
-              Action: "s3:ListBucket"
+              Action: "s3:*"
               Effect: Allow
               Resource: !Sub 'arn:aws:s3:::${bucket}'
               Principal:
                 AWS: "arn:aws:iam::${AWS::AccountId}:root"
-            - Sid: CrossAccPolicyDoc
-              Action: "s3:GetObject"
-              Effect: Allow
-              Resource: !Sub 'arn:aws:s3:::${S3BUCKET}/*'
-              Principal:
-                AWS: "arn:aws:iam::${AWS::AccountId}:root"      
+              #Condition:  { "Null": { "aws:MultiFactorAuthAge": true }}
+    
 
     bucketAccessPoint:
       Type: AWS::S3::AccessPoint
