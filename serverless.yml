@@ -166,7 +166,7 @@ resources:
                       "view": "timeSeries",
                       "stacked": false,
                       "metrics": [
-                        ["AWS/Lambda", "Invocations", "FunctionName", "$${FunctionName}", {
+                        ["AWS/Lambda", "Invocations", "FunctionName", "$${TransformerLambdaFunction}", {
                           "period": 86400,
                           "stat": "Sum"
                         }]
