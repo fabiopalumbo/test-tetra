@@ -145,7 +145,6 @@ resources:
      IAMRole:
        Description: IAM Role for EC2 instances
        Value: !Ref iamRole
-    Dashboard:
-        Description: "Dashboard created to monitor Lambda function"
-        Value: !Sub |
-            "https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home#dashboards:name=${DashboardName}"       
+     Dashboard:
+       Description: "Dashboard created to monitor Lambda function"
+       Value: "https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home#dashboards:name=${DashboardName}"
