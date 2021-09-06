@@ -130,12 +130,12 @@ resources:
         - Endpoint: !Ref notificationemail
           Protocol: email
 
-    cloudwatchDashboard:
-      Type: AWS::CloudWatch::Dashboard
-      Properties: 
-        DashboardBody: !Sub |
-                DASHBOARD_BODY
-        DashboardName: "lambda-dashboard"
+    # cloudwatchDashboard:
+    #   Type: AWS::CloudWatch::Dashboard
+    #   Properties: 
+    #     DashboardBody: !Sub |
+    #             DASHBOARD_BODY
+    #     DashboardName: "lambda-dashboard"
 
 
   Outputs:
@@ -145,6 +145,6 @@ resources:
      IAMRole:
        Description: IAM Role for EC2 instances
        Value: !Ref iamRole
-     Dashboard:
-       Description: "Dashboard created to monitor Lambda function"
-       Value: "https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home#dashboards:name=${DashboardName}"
+    #  Dashboard:
+    #    Description: "Dashboard created to monitor Lambda function"
+    #    Value: "https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home#dashboards:name=${DashboardName}"
