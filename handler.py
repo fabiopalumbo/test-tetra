@@ -37,7 +37,7 @@ def copy(bucket, key):
 def process(bucket, key, type):
     if type == json:
         try:
-            j=json.loads(sys.stdin.read()); print yaml.safe_dump(j)
+            j=json.loads(sys.stdin.read()); print(yaml.safe_dump(j))
         except Exception as ex:
             logger.exception(f"unhandled exception processing yaml s3://{bucket}/{key}")            
     elif type == yaml:
