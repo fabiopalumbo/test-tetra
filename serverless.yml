@@ -153,7 +153,7 @@ resources:
     # GetDate:
     #   Type: Custom::Value
     #   Properties:
-    #     ServiceToken: !GetAtt ValueFunc.Arn
+    #     ServiceToken: !GetAtt GetDateLambdaFunction.Arn
 
     cloudwatchDashboard:
       Type: AWS::CloudWatch::Dashboard
