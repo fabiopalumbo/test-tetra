@@ -56,21 +56,21 @@ resources:
         BucketName: !Sub "tetra-${candidatename}-${AWS::AccountId}" #// Custom Resource Date to be added !Sub ${self:service}-${self:provider.stage}-${AWS::AccountId}-${AWS::Region}
       DeletionPolicy: Retain
 
-    bucketPolicy:
-      Type: 'AWS::S3::BucketPolicy'
-      Properties:
-        Bucket: !Ref bucket
-        PolicyDocument:
-          Id: Allow
-          Version: "2012-10-17"
-          Statement:
-            - Sid: MFAOnlyAccess
-              Action: "s3:*"
-              Effect: Allow
-              Resource: !Sub 'arn:aws:s3:::${bucket}'
-              Principal:
-                AWS: "arn:aws:iam::${AWS::AccountId}:root"
-              #Condition:  { "Null": { "aws:MultiFactorAuthAge": true }}    
+    # bucketPolicy:
+    #   Type: 'AWS::S3::BucketPolicy'
+    #   Properties:
+    #     Bucket: !Ref bucket
+    #     PolicyDocument:
+    #       Id: Allow
+    #       Version: "2012-10-17"
+    #       Statement:
+    #         - Sid: MFAOnlyAccess
+    #           Action: "s3:*"
+    #           Effect: Allow
+    #           Resource: !Sub 'arn:aws:s3:::${bucket}'
+    #           Principal:
+    #             AWS: "arn:aws:iam::${AWS::AccountId}:root"
+    #           Condition:  { "Null": { "aws:MultiFactorAuthAge": true }}    
 
     bucketAccessPoint:
       Type: AWS::S3::AccessPoint
@@ -113,7 +113,7 @@ resources:
           Statement:
           - Effect: Allow
             Action: "s3:List*"
-            Resource: ["arn:aws:s3:::${bucket}/*.yaml",]
+            Resource: ["arn:aws:s3:::${bucket}/*.yaml"]
         Roles:
         - !Ref iamRole
     iamInstanceProfile:

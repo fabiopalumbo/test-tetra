@@ -43,6 +43,7 @@ npm install
 npx serverless deploy
 ```
 
+
 The bucket name and the notification email are set as parameters
 
 ```
@@ -59,7 +60,34 @@ aws s3 cp data/test.json s3://${BUCKET_NAME}/
 aws s3 cp data/test.yaml s3://${BUCKET_NAME}/
 ```
 
-## Logs Cloudwatch
+```
 
+```
 
+## CICD
 
+```
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - uses: aws-actions/setup-sam@v1
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ##region##
+      # sam build 
+      - run: sam build --use-container
+
+# Run Unit tests- Specify unit tests here 
+
+# sam deploy
+      - run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --stack-name bucketname --s3-bucket ##s3-bucket## --capabilities CAPABILITY_IAM --region ##region##
+```
