@@ -200,4 +200,5 @@ resources:
        Value: !Ref iamRole
      Dashboard:
        Description: "Dashboard created to monitor Lambda function"
-       Value: !Sub https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home#dashboards:name=${DashboardName}
+       Value: !Sub |
+            "https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home#dashboards:name=lambda-dashboard"
