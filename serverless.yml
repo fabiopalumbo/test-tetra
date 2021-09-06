@@ -40,7 +40,7 @@ functions:
 
 resources:
   Parameters:    
-    candidate_first_name:
+    candidate_name:
       Description: Candidate First Name 
       Type: String
       Default: test
