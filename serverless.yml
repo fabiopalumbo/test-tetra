@@ -40,7 +40,7 @@ functions:
 
 resources:
   Parameters:    
-    candidate_name:
+    candidatename:
       Description: Candidate First Name 
       Type: String
       Default: test
@@ -53,7 +53,7 @@ resources:
     bucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: !Sub "tetra_${candidate_name}_${AWS::AccountId}" #// Custom Resource Date to be added !Sub ${self:service}-${self:provider.stage}-${AWS::AccountId}-${AWS::Region}
+        BucketName: !Sub "tetra_${candidatename}_${AWS::AccountId}" #// Custom Resource Date to be added !Sub ${self:service}-${self:provider.stage}-${AWS::AccountId}-${AWS::Region}
       DeletionPolicy: Retain
 
     bucketPolicy:
