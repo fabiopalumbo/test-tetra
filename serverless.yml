@@ -135,7 +135,7 @@ resources:
       Properties: 
         DashboardBody: !Sub |
                 DASHBOARD_BODY
-        DashboardName: "${bucket}-dashboard"
+        DashboardName: "lambda-dashboard"
 
 
   Outputs:
