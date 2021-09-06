@@ -72,7 +72,7 @@ resources:
     bucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: !Sub "tetra-${candidatename}-${AWS::AccountId}" #// Custom Resource Date to be added !Sub ${self:service}-${self:provider.stage}-${AWS::AccountId}-${AWS::Region}
+        BucketName: !Sub "tetra-${candidatename}-${AWS::AccountId}" # Custom Resource Date to be added
       DeletionPolicy: Retain
 
     # bucketPolicy:
@@ -155,38 +155,38 @@ resources:
     #   Properties:
     #     ServiceToken: !GetAtt GetDateLambdaFunction.Arn
 
-    cloudwatchDashboard:
-      Type: AWS::CloudWatch::Dashboard
-      Properties: 
-        DashboardBody: !Sub |
-{
-	"widgets": [
-		{
-			"type": "metric",
-			"x": 0,
-			"y": 0,
-			"width": 18,
-			"height": 6,
-			"properties": {
-				"view": "timeSeries",
-				"stacked": false,
-				"metrics": [
-					["AWS/Lambda", "Invocations", "FunctionName", "$${TransformerLambdaFunction}", {
-						"period": 86400,
-						"stat": "Sum"
-					}]
-				],
-				"region": "$${AWS::Region}",
-				"yAxis": {
-					"left": {
-						"min": 0
-					}
-				}
-			}
-		}
-  ]
-}
-        DashboardName: "lambda-dashboard"
+    # cloudwatchDashboard:
+    #   Type: AWS::CloudWatch::Dashboard
+    #   Properties: 
+    #     DashboardBody: !Sub |                      
+    #       {
+    #                   "widgets": [
+    #                     {
+    #                       "type": "metric",
+    #                       "x": 0,
+    #                       "y": 0,
+    #                       "width": 18,
+    #                       "height": 6,
+    #                       "properties": {
+    #                         "view": "timeSeries",
+    #                         "stacked": false,
+    #                         "metrics": [
+    #                           ["AWS/Lambda", "Invocations", "FunctionName", "$${TransformerLambdaFunction}", {
+    #                             "period": 86400,
+    #                             "stat": "Sum"
+    #                           }]
+    #                         ],
+    #                         "region": "$${AWS::Region}",
+    #                         "yAxis": {
+    #                           "left": {
+    #                             "min": 0
+    #                           }
+    #                         }
+    #                       }
+    #                     }
+    #                     ]
+    #       }
+    #     DashboardName: "lambda-dashboard"
 
 
   Outputs:
@@ -196,7 +196,7 @@ resources:
      IAMRole:
        Description: IAM Role for EC2 instances
        Value: !Ref iamRole
-     Dashboard:
-       Description: "Dashboard created to monitor Lambda function"
-       Value: !Sub |
-            "https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home#dashboards:name=lambda-dashboard"
+    #  Dashboard:
+    #    Description: "Dashboard created to monitor Lambda function"
+    #    Value: !Sub |
+    #         "https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home#dashboards:name=lambda-dashboard"
