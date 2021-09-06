@@ -44,7 +44,7 @@ resources:
       Description: Candidate First Name 
       Type: String
       Default: test
-    notification_email:
+    notificationemail:
       Description: Notification Email 
       Type: String
       Default: test@test.com
@@ -127,7 +127,7 @@ resources:
       Type: AWS::SNS::Topic
       Properties:
         Subscription:
-        - Endpoint: !Ref notification_email
+        - Endpoint: !Ref notificationemail
           Protocol: email
 
     cloudwatchDashboard:
