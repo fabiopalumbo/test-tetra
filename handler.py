@@ -28,11 +28,23 @@ def publish_to_sns(sub, msg):
         Subject=sub
     )
 
-def transform(bucket, key):
+def copy(bucket, key):
     s3_client.copy(
         CopySource={'Bucket': bucket, 'Key': key },
         Bucket=bucket_name,
         Key=key)
+
+def process(bucket, key, type):
+    if type == json:
+        try:
+            j=json.loads(sys.stdin.read()); print yaml.safe_dump(j)
+        except Exception as ex:
+            logger.exception(f"unhandled exception processing yaml s3://{bucket}/{key}")            
+    elif type == yaml:
+        try:
+            y= yaml.safe_load(sys.stdin.read()) ; print(json.dumps(y))
+        except Exception as ex:
+            logger.exception(f"unhandled exception processing json s3://{bucket}/{key}")   
 
 def handle_event(event, context):
     """
@@ -55,16 +67,14 @@ def handle_event(event, context):
         json_key = str(path.with_suffix('.json'))
         try:
             json_body = s3_client.get_object(Bucket=bucket_name, Key=json_key)['Body']
-            # transfor function
-            # j=json.loads(sys.stdin.read()); print yaml.safe_dump(j)
+            #transfor function
             print('## File Uploaded')
             print(json_key)            
             num_lines = sum(1 for line in open(json_key))
             print('## Number of Lines')
             print(num_lines)
             resp['StatusCode'] = 200
-
-            copy(bucket_name, f"json_key")
+            copy(bucket_name, f"{json_key}.yaml")
         except botocore.exceptions.ClientError as error:
             resp['ErrorCode'] = error.response['Error']['Code']
             resp['StatusCode'] = error.response['ResponseMetadata']['HTTPStatusCode']
@@ -74,12 +84,13 @@ def handle_event(event, context):
         yaml_key = str(path.with_suffix('.yaml'))
         try:
             yaml_body = s3_client.get_object(Bucket=bucket_name, Key=yaml_key)['Body']
-            # transform function
-            # y = yaml.safe_load(sys.stdin.read()) ; print(json.dumps(y))
+            #transform function
             num_lines = sum(1 for line in open(yaml_key))
             print('## Number of Lines')
             print(num_lines)            
             resp['StatusCode'] = 200
+
+            copy(bucket_name, f"{yaml_key}.json")
         except botocore.exceptions.ClientError as error:
             resp['ErrorCode'] = error.response['Error']['Code']
             resp['StatusCode'] = error.response['ResponseMetadata']['HTTPStatusCode']
