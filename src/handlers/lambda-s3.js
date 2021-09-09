@@ -52,7 +52,7 @@ function convertJson(file) {
 // event.outputKey: target file key
 // event.limit: maximum number of lines to read
 
-exports.lambdaS3Handler = async (event, context, callback) => {
+exports.lambdaS3Handler = async (event, context) => {
     const getObjectRequests = event.Records.map(async (record) => {
         const params = {
             Bucket: record.s3.bucket.name,
