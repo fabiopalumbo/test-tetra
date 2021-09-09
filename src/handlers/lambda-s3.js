@@ -81,10 +81,11 @@ exports.lambdaS3Handler = async (event, context) => {
             console.log("File Name");
             console.log(key);
             console.log(src_key);
+            console.log(filename);
+            console.log(type);
             console.log("File Info");
             console.log(Body.toString());
-
-
+            
             // Tranforms + Count lines
             readStream.on('line', line => {
         
