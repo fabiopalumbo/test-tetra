@@ -26,7 +26,11 @@ Resources:
       Timeout: 60
       DeadLetterQueue:
         Type: SQS
-        TargetArn: !GetAtt deadQueue.Arn      
+        TargetArn: !GetAtt deadQueue.Arn
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref bucket
+          SNS_ARN: !Ref snsTopic             
       Policies:
         - SQSSendMessagePolicy:
             QueueName: !GetAtt deadQueue.QueueName      
