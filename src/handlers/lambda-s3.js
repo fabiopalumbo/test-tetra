@@ -90,7 +90,6 @@ exports.lambdaS3Handler = async (event, context, callback) => {
         
                 if (event.limit && event.limit <= totalLineCount) {
                     return readStream.close()
-                    console.log(src_key);
                     console.log("Line Count");
                     console.log(totalLineCount);                    
                 }

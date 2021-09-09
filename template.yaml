@@ -14,7 +14,6 @@ Parameters:
     Default: test@test.com
 
 Resources:
-
   LambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -27,10 +26,10 @@ Resources:
       DeadLetterQueue:
         Type: SQS
         TargetArn: !GetAtt deadQueue.Arn
-      Environment:
-        Variables:
-          BUCKET_NAME: !Ref bucket
-          SNS_ARN: !Ref snsTopic             
+      # Environment:
+      #   Variables:
+      #     BUCKET_NAME: !Ref bucket
+      #     SNS_ARN: !GetAtt snsTopic.Arn
       Policies:
         - SQSSendMessagePolicy:
             QueueName: !GetAtt deadQueue.QueueName      
@@ -78,6 +77,11 @@ Resources:
   #           Resource: !Sub 'arn:aws:s3:::${bucket}'
   #           Principal:
   #             AWS: "arn:aws:iam::${AWS::AccountId}:root"
+
+  # GetDate:
+  #   Type: Custom::Value
+  #   Properties:
+  #     ServiceToken: !GetAtt GetDateLambdaFunction.Arn  
 
   iamRole:
     Type: AWS::IAM::Role
