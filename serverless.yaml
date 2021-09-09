@@ -28,7 +28,12 @@ Resources:
       Description: A Lambda function that logs a json file sent to S3 bucket, and after convert YAML <-> JSON.
       MemorySize: 128
       Timeout: 60
+      DeadLetterQueue:
+        Type: SQS
+        TargetArn: !GetAtt deadQueue.Arn      
       Policies:
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt deadQueue.QueueName      
         # Give Read Permissions to the S3 Bucket
         - S3ReadPolicy:
             BucketName: !Sub  "tetra-${candidatename}-${AWS::AccountId}"
