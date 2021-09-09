@@ -87,7 +87,7 @@ exports.lambdaS3Handler = async (event, context) => {
             console.log("File Info");
             console.log(Body.toString());
 
-            // Tranforms + Count lines
+            // Tranforms + Count lines / begin stream
             readStream.on('line', line => {
         
                 if (event.limit && event.limit <= totalLineCount) {
@@ -114,6 +114,17 @@ exports.lambdaS3Handler = async (event, context) => {
                     }
                 }        
                 totalLineCount++
+            })
+
+            // end stream
+            readStream.on('end', async () => {
+
+                // end write stream
+                writeStream.end()
+            
+                // wait for upload
+                const uploadResponse = await uploadPromise
+            
             })
 
 
