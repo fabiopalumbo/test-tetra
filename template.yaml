@@ -117,10 +117,83 @@ Resources:
   deadQueue:
     Type: AWS::SQS::Queue
 
+  lambdaDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: !Ref AWS::StackName
+      DashboardBody: !Sub '{
+        "widgets":
+          [
+            {
+              "type":"metric",
+              "x":0,
+              "y":0,
+              "width":12,
+              "height":6,
+              "properties":{
+                "metrics":[
+                  [
+                    "AWS/Lambda",
+                    "Invocations",
+                    "FunctionName",
+                    "${LambdaFunction}"
+                  ]
+                ],
+                "period":60,
+                "stat":"Sum",
+                "region": "${AWS::Region}",
+                "title":"Lambda Function Invocations"
+              }
+            },
+            {
+              "type":"metric",
+              "x":12,
+              "y":0,
+              "width":12,
+              "height":6,
+              "properties":{
+                "metrics":[
+                  [ "AWS/Lambda", "Errors", "FunctionName", "${LambdaFunction}", { "id": "m1", "visible": false } ],
+                  [ { "expression": "100*(m1/m2)", "label": "Error Rate", "id": "e1", "region": "${AWS::Region}" } ],
+                  [ "AWS/Lambda", "Invocations", "FunctionName", "${LambdaFunction}", { "id": "m2", "visible": false } ]
+                ],
+                "period":60,
+                "stat":"Sum",
+                "region": "${AWS::Region}",
+                "title":"Lambda Function Error Rate"
+              }
+            },
+            {
+              "type":"metric",
+              "x":0,
+              "y":6,
+              "width":12,
+              "height":6,
+              "properties":{
+                "metrics":[
+                  [ "AWS/Lambda", "ConcurrentExecutions", "FunctionName", "${LambdaFunction}", { "stat": "Average" } ],
+                  [ "...", { "stat": "Maximum" } ],
+                  [ "...", { "stat": "Minimum", "label": "ConcurrentExecutions (minimum)" } ],
+                  [ "...", { "stat": "p90", "label": "ConcurrentExecutions (p90)"} ],
+                  [ "...", { "stat": "p95", "label": "ConcurrentExecutions (p95)"} ],
+                  [ "...", { "stat": "p99", "label": "ConcurrentExecutions (p99)" } ]
+                ],
+                "period":60,
+                "stat":"Maximum",
+                "region": "${AWS::Region}",
+                "title":"Lambda Function Concurrent Executions"
+              }
+            }
+          ]
+        }'
+
 Outputs:
-    BucketARN:
-      Description: Bucket ARN
-      Value: !GetAtt bucket.Arn
-    IAMRole:
-      Description: IAM Role for EC2 instances
-      Value: !Ref iamRole
+  BucketARN:
+    Description: Bucket ARN
+    Value: !GetAtt bucket.Arn
+  IAMRole:
+    Description: IAM Role for EC2 instances
+    Value: !Ref iamRole
+  Dashboard:
+    Description: CloudWatch Dashboard URL
+    Value: !Sub "https://console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#dashboards:name=${lambdaDashboard}"      

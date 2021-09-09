@@ -45,7 +45,7 @@ sam build -m package.json
 
 ## Deployment
 
-The deployment consists of a Lambda Function, IAM Role, Log Group, SNS, Custom Date Resource, Cloudwatch dashboard, S3 Bucket and Dead Letter Queue.
+The deployment consists of a Lambda Function, IAM Role, Log Group, SNS, Custom Date Resource, Cloudwatch dashboard, S3 Bucket and Dead Letter Queue (can send information about an asynchronous request when processing fails).
 
 Deployment uses sam. Ref. https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install-linux.html
 
@@ -58,6 +58,42 @@ sam build
 
 #Step 3
 sam deploy --guided
+
+
+        Deploying with following values
+        ===============================
+        Stack name                   : lambda-s3
+        Region                       : us-east-1
+        Confirm changeset            : True
+        Deployment s3 bucket         : aws-sam-cli-managed-default-samclisourcebucket-166345w5emy53
+        Capabilities                 : ["CAPABILITY_IAM"]
+        Parameter overrides          : {"candidatename": "test", "notificationemail": "test@test.com"}
+        Signing Profiles             : {}
+
+Initiating deployment
+=====================
+File with same data already exists at lambda-s3/c5ca7a202286aaa6432cf1ebb04b1b98.template, skipping upload
+
+Waiting for changeset to be created..
+
+CloudFormation stack changeset
+---------------------------------------------------------------------------------------------------------------------
+Operation                     LogicalResourceId             ResourceType                  Replacement
+---------------------------------------------------------------------------------------------------------------------
++ Add                         LambdaFunctionRole            AWS::IAM::Role                N/A
++ Add                         LambdaFunctionbucketEventjs   AWS::Lambda::Permission       N/A
+                              onPermission
++ Add                         LambdaFunctionbucketEventya   AWS::Lambda::Permission       N/A
+                              mlPermission
++ Add                         LambdaFunction                AWS::Lambda::Function         N/A
++ Add                         bucket                        AWS::S3::Bucket               N/A
++ Add                         deadQueue                     AWS::SQS::Queue               N/A
++ Add                         iamInstanceProfile            AWS::IAM::InstanceProfile     N/A
++ Add                         iamPolicies                   AWS::IAM::Policy              N/A
++ Add                         iamRole                       AWS::IAM::Role                N/A
++ Add                         snsTopic                      AWS::SNS::Topic               N/A
+---------------------------------------------------------------------------------------------------------------------
+
 ```
 
 
