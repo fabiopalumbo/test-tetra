@@ -1,0 +1,125 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  Lambda-S3 starter project
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    PermissionsBoundary: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/${AppId}-${AWS::Region}-PermissionsBoundary'
+
+Parameters:    
+  candidatename:
+    Description: Candidate First Name 
+    Type: String
+    Default: test
+  notificationemail:
+    Description: Notification Email 
+    Type: String
+    Default: test@test.com
+
+Resources:
+
+  LambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/lambda-s3.lambdaS3Handler
+      Runtime: nodejs14.x
+      Description: A Lambda function that logs a json file sent to S3 bucket, and after convert YAML <-> JSON.
+      MemorySize: 128
+      Timeout: 60
+      Policies:
+        # Give Read Permissions to the S3 Bucket
+        - S3ReadPolicy:
+            BucketName: !Sub  "tetra-${candidatename}-${AWS::AccountId}"
+      Events:
+        bucketEvent_json:
+          Type: S3
+          Properties:
+            Bucket: !Ref bucket
+            Events: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: suffix
+                    Value: ".json"
+        bucketEvent_yaml:
+          Type: S3
+          Properties:
+            Bucket: !Ref bucket
+            Events: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: suffix
+                    Value: ".yaml"                    
+  bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "tetra-${candidatename}-${AWS::AccountId}" # Custom Resource Date to be added
+    DeletionPolicy: Retain
+
+  # bucketPolicy:
+  #   Type: 'AWS::S3::BucketPolicy'
+  #   Properties:
+  #     Bucket: !Ref bucket
+  #     PolicyDocument:
+  #       Id: Allow
+  #       Version: "2012-10-17"
+  #       Statement:
+  #         - Sid: MFAOnlyAccess
+  #           Action: "s3:*"
+  #           Effect: Allow
+  #           Resource: !Sub 'arn:aws:s3:::${bucket}'
+  #           Principal:
+  #             AWS: "arn:aws:iam::${AWS::AccountId}:root"
+
+  iamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+  iamPolicies:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: s3_read_only_yaml
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action: "s3:List*"
+          Resource: ["arn:aws:s3:::${bucket}/*.yaml"]
+      Roles:
+      - !Ref iamRole
+  iamInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+      - !Ref iamRole
+
+  snsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+      - Endpoint: !Ref notificationemail
+        Protocol: email
+
+  deadQueue:
+    Type: AWS::SQS::Queue
+
+Outputs:
+    BucketARN:
+      Description: Bucket ARN
+      Value: !GetAtt bucket.Arn
+    IAMRole:
+      Description: IAM Role for EC2 instances
+      Value: !Ref iamRole
