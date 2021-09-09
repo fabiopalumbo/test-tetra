@@ -38,7 +38,7 @@ Resources:
         - S3ReadPolicy:
             BucketName: !Sub  "tetra-${candidatename}-${AWS::AccountId}"
       Events:
-        bucketEvent_json:
+        bucketEventjson:
           Type: S3
           Properties:
             Bucket: !Ref bucket
@@ -48,7 +48,7 @@ Resources:
                 Rules:
                   - Name: suffix
                     Value: ".json"
-        bucketEvent_yaml:
+        bucketEventyaml:
           Type: S3
           Properties:
             Bucket: !Ref bucket
