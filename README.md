@@ -29,18 +29,72 @@ Fetching and transforming data from S3 using AWS Lambda is one of the most commo
 ## Diagram
 ![Diagram](diagram.png "Diagram")
 
+
+## Build and test locally
+
+The AWS SAM command line interface (CLI) is an extension of the AWS CLI that adds functionality for building and testing Lambda applications. It uses Docker to run your functions in an Amazon Linux environment that matches Lambda. It can also emulate your application's build environment and API.
+
+If you prefer to use an integrated development environment (IDE) to build and test your application, you can use the AWS Toolkit. The AWS Toolkit is an open-source plugin for popular IDEs that uses the AWS SAM CLI to build and deploy serverless applications on AWS. The AWS Toolkit also adds step-through debugging for Lambda function code.
+
+## Build
+
+Build your application with the sam build command.
+```
+sam build -m package.json
+```
+
 ## Deployment
 
-The deployment consists of a Lambda Function, IAM Role, Log Group, SNS, Custom Date Resource, Cloudwatch dashboard, S3 Bucket and Access Points.
+The deployment consists of a Lambda Function, IAM Role, Log Group, SNS, Custom Date Resource, Cloudwatch dashboard, S3 Bucket and Dead Letter Queue (can send information about an asynchronous request when processing fails).
 
-Deployment uses [The Serverless Framework](https://serverless.com).
-```
-curl -o- -L https://slss.io/install | bash
-```
+Deployment uses sam. Ref. https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install-linux.html
 
 ```
-npm install
-npx serverless deploy
+#Step 1 
+sam init
+
+#Step 2 
+sam build
+
+#Step 3
+sam deploy --guided
+
+
+        Deploying with following values
+        ===============================
+        Stack name                   : lambda-s3
+        Region                       : us-east-1
+        Confirm changeset            : True
+        Deployment s3 bucket         : aws-sam-cli-managed-default-samclisourcebucket-166345w5emy53
+        Capabilities                 : ["CAPABILITY_IAM"]
+        Parameter overrides          : {"candidatename": "test", "notificationemail": "test@test.com"}
+        Signing Profiles             : {}
+
+Initiating deployment
+=====================
+File with same data already exists at lambda-s3/c5ca7a202286aaa6432cf1ebb04b1b98.template, skipping upload
+
+Waiting for changeset to be created..
+
+CloudFormation stack changeset
+---------------------------------------------------------------------------------------------------------------------
+Operation                     LogicalResourceId             ResourceType                  Replacement
+---------------------------------------------------------------------------------------------------------------------
++ Add                         LambdaFunctionRole            AWS::IAM::Role                N/A
++ Add                         LambdaFunctionbucketEventjs   AWS::Lambda::Permission       N/A
+                              onPermission
++ Add                         LambdaFunctionbucketEventya   AWS::Lambda::Permission       N/A
+                              mlPermission
++ Add                         LambdaFunction                AWS::Lambda::Function         N/A
++ Add                         bucket                        AWS::S3::Bucket               N/A
++ Add                         deadQueue                     AWS::SQS::Queue               N/A
++ Add                         iamInstanceProfile            AWS::IAM::InstanceProfile     N/A
++ Add                         iamPolicies                   AWS::IAM::Policy              N/A
++ Add                         iamRole                       AWS::IAM::Role                N/A
++ Add                         snsTopic                      AWS::SNS::Topic               N/A
+---------------------------------------------------------------------------------------------------------------------
+
+
 ```
 
 
@@ -58,43 +112,6 @@ A sample JSON / YAML file is included. To test the function, first copy the file
 ```
 aws s3 cp data/test.json s3://${BUCKET_NAME}/
 aws s3 cp data/test.yaml s3://${BUCKET_NAME}/
-```
-
-```
-npx serverless deploy
-Serverless: Configuration warning at 'functions.transformer': unrecognized property 'memory'
-Serverless:
-Serverless: Learn more about configuration validation here: http://slss.io/configuration-validation
-Serverless:
-Serverless: Generated requirements from /home/dioscuro/solvd/test-tetra/requirements.txt in /home/dioscuro/solvd/test-tetra/.serverless/requirements.txt...
-Serverless: Using static cache of requirements found at /home/dioscuro/.cache/serverless-python-requirements/342f31aac2f602ced79e05495d266937d5542552cbbec2b26bb9bb626c81618a_slspyc ...
-Serverless: Packaging service...
-Serverless: Excluding development dependencies...
-Serverless: Injecting required Python packages to package...
-
-Serverless: Uploading CloudFormation file to S3...
-Serverless: Uploading artifacts...
-Serverless: Uploading service object-lambda-transform.zip file to S3 (69.41 MB)...
-Serverless: Validating template...
-Serverless: Updating Stack...
-Serverless: Checking Stack update progress...
-.................................
-...
-Serverless: Stack update finished...
-Service Information
-service: object-lambda-transform
-stage: dev
-region: us-east-1
-stack: object-lambda-transform-dev
-resources: 13
-api keys:
-  None
-endpoints:
-  None
-functions:
-  transformer: object-lambda-transform-dev-transformer
-layers:
-  None
 ```
 
 ## CICD

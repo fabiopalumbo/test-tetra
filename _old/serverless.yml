@@ -1,0 +1,202 @@
+service: object-lambda-transform
+frameworkVersion: '2'
+
+plugins:
+  - serverless-python-requirements
+
+provider:
+  name: aws
+  runtime: python3.7
+  lambdaHashingVersion: 20201221
+  stage: dev
+  region: us-east-1
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3-object-lambda:WriteGetObjectResponse
+          Resource: '*'
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+            - s3:ListBucket
+          Resource:
+            - !GetAtt bucket.Arn
+            - !Join ['/', [{Fn::GetAtt: [bucket, Arn]}, '*']]
+
+custom:
+  pythonRequirements:
+    dockerizePip: non-linux
+
+functions:
+  transformer:
+    name: transform_lambda
+    handler: handler.handle_event
+    events:
+      - s3:
+          bucket: !Ref bucket
+          event: s3:ObjectCreated:*
+          rules:
+            - suffix: .json
+          existing: true
+      - s3:
+          bucket: !Ref bucket
+          event: s3:ObjectCreated:*
+          rules:
+            - suffix: .yaml
+          existing: true
+    memory: 512
+    timeout: 30
+    environment:
+      BUCKET_NAME: !Ref bucket
+      SNS_ARN: !Ref snsTopic
+  customResources:
+    name: getday_function
+    handler: getday.handle_event
+    memorySize: 256
+    timeout: 300
+
+resources:
+  Parameters:    
+    candidatename:
+      Description: Candidate First Name 
+      Type: String
+      Default: test
+    notificationemail:
+      Description: Notification Email 
+      Type: String
+      Default: test@test.com
+
+  Resources:
+    bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: !Sub "tetra-${candidatename}-${AWS::AccountId}" # Custom Resource Date to be added
+      DeletionPolicy: Retain
+
+    # bucketPolicy:
+    #   Type: 'AWS::S3::BucketPolicy'
+    #   Properties:
+    #     Bucket: !Ref bucket
+    #     PolicyDocument:
+    #       Id: Allow
+    #       Version: "2012-10-17"
+    #       Statement:
+    #         - Sid: MFAOnlyAccess
+    #           Action: "s3:*"
+    #           Effect: Allow
+    #           Resource: !Sub 'arn:aws:s3:::${bucket}'
+    #           Principal:
+    #             AWS: "arn:aws:iam::${AWS::AccountId}:root"
+    #           Condition:  { "Null": { "aws:MultiFactorAuthAge": true }}    
+
+    bucketAccessPoint:
+      Type: AWS::S3::AccessPoint
+      Properties:
+        Bucket: !Ref bucket
+        Name: ${self:service}-${self:provider.stage}-ap
+
+    lambdaAccessPoint:
+      Type: AWS::S3ObjectLambda::AccessPoint
+      Properties:
+        Name: ${self:service}-${self:provider.stage}-lambda-ap
+        ObjectLambdaConfiguration:
+          CloudWatchMetricsEnabled: true
+          SupportingAccessPoint: !Sub arn:aws:s3:${AWS::Region}:${AWS::AccountId}:accesspoint/${self:service}-${self:provider.stage}-ap
+
+          TransformationConfigurations:
+            - Actions: ['GetObject']
+              ContentTransformation:
+                AwsLambda:
+                  FunctionArn: !GetAtt TransformerLambdaFunction.Arn
+
+    iamRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - ec2.amazonaws.com
+            Action:
+            - sts:AssumeRole
+        Path: "/"
+    iamPolicies:
+      Type: AWS::IAM::Policy
+      Properties:
+        PolicyName: s3_read_only_yaml
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action: "s3:List*"
+            Resource: ["arn:aws:s3:::${bucket}/*.yaml"]
+        Roles:
+        - !Ref iamRole
+    iamInstanceProfile:
+      Type: AWS::IAM::InstanceProfile
+      Properties:
+        Path: "/"
+        Roles:
+        - !Ref iamRole
+
+    snsTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        Subscription:
+        - Endpoint: !Ref notificationemail
+          Protocol: email
+
+    # GetDate:
+    #   Type: Custom::Value
+    #   Properties:
+    #     ServiceToken: !GetAtt GetDateLambdaFunction.Arn
+
+    # cloudwatchDashboard:
+    #   Type: AWS::CloudWatch::Dashboard
+    #   Properties: 
+    #     DashboardBody: !Sub |                      
+    #       {
+    #                   "widgets": [
+    #                     {
+    #                       "type": "metric",
+    #                       "x": 0,
+    #                       "y": 0,
+    #                       "width": 18,
+    #                       "height": 6,
+    #                       "properties": {
+    #                         "view": "timeSeries",
+    #                         "stacked": false,
+    #                         "metrics": [
+    #                           ["AWS/Lambda", "Invocations", "FunctionName", "$${TransformerLambdaFunction}", {
+    #                             "period": 86400,
+    #                             "stat": "Sum"
+    #                           }]
+    #                         ],
+    #                         "region": "$${AWS::Region}",
+    #                         "yAxis": {
+    #                           "left": {
+    #                             "min": 0
+    #                           }
+    #                         }
+    #                       }
+    #                     }
+    #                     ]
+    #       }
+    #     DashboardName: "lambda-dashboard"
+
+
+  Outputs:
+     BucketARN:
+       Description: Bucket ARN
+       Value: !GetAtt bucket.Arn
+     IAMRole:
+       Description: IAM Role for EC2 instances
+       Value: !Ref iamRole
+    #  Dashboard:
+    #    Description: "Dashboard created to monitor Lambda function"
+    #    Value: !Sub |
+    #         "https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home#dashboards:name=lambda-dashboard"

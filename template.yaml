@@ -1,0 +1,206 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  Lambda-S3 starter project
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:    
+  candidatename:
+    Description: Candidate First Name 
+    Type: String
+    Default: test
+  notificationemail:
+    Description: Notification Email 
+    Type: String
+    Default: test@test.com
+
+Resources:
+  LambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/lambda-s3.lambdaS3Handler
+      Runtime: nodejs14.x
+      Description: A Lambda function that logs a json file sent to S3 bucket, and after convert YAML <-> JSON.
+      MemorySize: 128
+      Timeout: 60
+      DeadLetterQueue:
+        Type: SQS
+        TargetArn: !GetAtt deadQueue.Arn
+      Environment:
+        Variables:
+          SNS_ARN: !GetAtt snsTopic.Arn
+      Policies:
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt deadQueue.QueueName      
+        # Give Read Permissions to the S3 Bucket
+        - S3ReadPolicy:
+            BucketName: !Sub  "tetra-${candidatename}-${AWS::AccountId}"
+      Events:
+        bucketEventjson:
+          Type: S3
+          Properties:
+            Bucket: !Ref bucket
+            Events: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: suffix
+                    Value: ".json"
+        bucketEventyaml:
+          Type: S3
+          Properties:
+            Bucket: !Ref bucket
+            Events: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: suffix
+                    Value: ".yaml"                    
+  bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "tetra-${candidatename}-${AWS::AccountId}" # Custom Resource Date to be added
+    DeletionPolicy: Retain
+
+  # bucketPolicy:
+  #   Type: 'AWS::S3::BucketPolicy'
+  #   Properties:
+  #     Bucket: !Ref bucket
+  #     PolicyDocument:
+  #       Id: Allow
+  #       Version: "2012-10-17"
+  #       Statement:
+  #         - Sid: MFAOnlyAccess
+  #           Action: "s3:*"
+  #           Effect: Allow
+  #           Resource: !Sub 'arn:aws:s3:::${bucket}'
+  #           Principal:
+  #             AWS: "arn:aws:iam::${AWS::AccountId}:root"
+
+  # GetDate:
+  #   Type: Custom::Value
+  #   Properties:
+  #     ServiceToken: !GetAtt GetDateLambdaFunction.Arn  
+
+  iamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+  iamPolicies:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: s3_read_only_yaml
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action: "s3:List*"
+          Resource: ["arn:aws:s3:::${bucket}/*.yaml"]
+      Roles:
+      - !Ref iamRole
+  iamInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+      - !Ref iamRole
+
+  snsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+      - Endpoint: !Ref notificationemail
+        Protocol: email
+
+  deadQueue:
+    Type: AWS::SQS::Queue
+
+  lambdaDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: !Ref AWS::StackName
+      DashboardBody: !Sub '{
+        "widgets":
+          [
+            {
+              "type":"metric",
+              "x":0,
+              "y":0,
+              "width":12,
+              "height":6,
+              "properties":{
+                "metrics":[
+                  [
+                    "AWS/Lambda",
+                    "Invocations",
+                    "FunctionName",
+                    "${LambdaFunction}"
+                  ]
+                ],
+                "period":60,
+                "stat":"Sum",
+                "region": "${AWS::Region}",
+                "title":"Lambda Function Invocations"
+              }
+            },
+            {
+              "type":"metric",
+              "x":12,
+              "y":0,
+              "width":12,
+              "height":6,
+              "properties":{
+                "metrics":[
+                  [ "AWS/Lambda", "Errors", "FunctionName", "${LambdaFunction}", { "id": "m1", "visible": false } ],
+                  [ { "expression": "100*(m1/m2)", "label": "Error Rate", "id": "e1", "region": "${AWS::Region}" } ],
+                  [ "AWS/Lambda", "Invocations", "FunctionName", "${LambdaFunction}", { "id": "m2", "visible": false } ]
+                ],
+                "period":60,
+                "stat":"Sum",
+                "region": "${AWS::Region}",
+                "title":"Lambda Function Error Rate"
+              }
+            },
+            {
+              "type":"metric",
+              "x":0,
+              "y":6,
+              "width":12,
+              "height":6,
+              "properties":{
+                "metrics":[
+                  [ "AWS/Lambda", "ConcurrentExecutions", "FunctionName", "${LambdaFunction}", { "stat": "Average" } ],
+                  [ "...", { "stat": "Maximum" } ],
+                  [ "...", { "stat": "Minimum", "label": "ConcurrentExecutions (minimum)" } ],
+                  [ "...", { "stat": "p90", "label": "ConcurrentExecutions (p90)"} ],
+                  [ "...", { "stat": "p95", "label": "ConcurrentExecutions (p95)"} ],
+                  [ "...", { "stat": "p99", "label": "ConcurrentExecutions (p99)" } ]
+                ],
+                "period":60,
+                "stat":"Maximum",
+                "region": "${AWS::Region}",
+                "title":"Lambda Function Concurrent Executions"
+              }
+            }
+          ]
+        }'
+
+Outputs:
+  BucketARN:
+    Description: Bucket ARN
+    Value: !GetAtt bucket.Arn
+  IAMRole:
+    Description: IAM Role for EC2 instances
+    Value: !Ref iamRole
+  Dashboard:
+    Description: CloudWatch Dashboard URL
+    Value: !Sub "https://console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#dashboards:name=${lambdaDashboard}"      
