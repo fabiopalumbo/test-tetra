@@ -98,14 +98,17 @@ exports.lambdaS3Handler = async (event, context) => {
                 else {
                     // Transform File
                     if (type == '.yaml') {
+                        console.log("YAML File Conversion");
                         line = convertYaml(key)
                         writeStream.write(`${line}\n`)
                     }
                     else if ( type == '.json') {
+                        console.log("JSON File Conversion");
                         line = convertJson(key)
                         writeStream.write(`${line}\n`)
                     }
                     else {
+                        console.log("Error sending SNS");
                         sns.publish(sns_params).promise();
                     }
                 }        
