@@ -36,14 +36,14 @@ function createWriteStream(Bucket, Key) {
     return { writeStream, uploadPromise }
 }
 
-function convertYaml(file) {
+function convertYaml(line) {
     // do something
-    return file
+    return line
 }
 
-function convertJson(file) {
+function convertJson(line) {
     // do something
-    return file
+    return line
 }
 
 // event.inputBucket: source file bucket
@@ -85,7 +85,7 @@ exports.lambdaS3Handler = async (event, context) => {
             console.log(type);
             console.log("File Info");
             console.log(Body.toString());
-            
+
             // Tranforms + Count lines
             readStream.on('line', line => {
         
