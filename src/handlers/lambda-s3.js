@@ -90,20 +90,24 @@ exports.lambdaS3Handler = async (event, context, callback) => {
         
                 if (event.limit && event.limit <= totalLineCount) {
                     return readStream.close()
+                    console.log(src_key);
+                    console.log("Line Count");
+                    console.log(totalLineCount);                    
                 }
                 
                 else {
                     // Transform File
-                    if (type == '.yaml')
+                    if (type == '.yaml') {
                         line = convertYaml(key)
                         writeStream.write(`${line}\n`)
-
-                    else if ( type == '.json')
+                    }
+                    else if ( type == '.json') {
                         line = convertJson(key)
                         writeStream.write(`${line}\n`)
-
-                    else
+                    }
+                    else {
                         const data = await sns.publish(sns_params).promise();
+                    }
                 }        
                 totalLineCount++
             })
