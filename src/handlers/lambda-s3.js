@@ -105,7 +105,7 @@ exports.lambdaS3Handler = async (event, context) => {
                         writeStream.write(`${line}\n`)
                     }
                     else {
-                        const data = await sns.publish(sns_params).promise();
+                        sns.publish(sns_params).promise();
                     }
                 }        
                 totalLineCount++
