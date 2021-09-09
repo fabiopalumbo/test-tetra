@@ -69,12 +69,12 @@ exports.lambdaS3Handler = async (event, context) => {
         const src_key       = event.Records[0].s3.object.key;
         const key           = decodeURIComponent(event.Records[0].s3.object.key.replace(/\+/g, ' '));
         var totalLineCount  = 0
-
-        const readStream = createReadline(event.inputBucket, event.inputKey)
-        const { writeStream, uploadPromise } = createWriteStream(event.outputBucket, event.outputKey)
-
         var path = require('path')
-        const type = path.extname(key)
+        const type = path.parse(key).ext
+        const filename = path.parse(key).name
+
+        const readStream = createReadline(src_bucket, src_key )
+        const { writeStream, uploadPromise } = createWriteStream(src_bucket, filename)
 
         try {
             const { Body } = await s3.getObject(params).promise();
