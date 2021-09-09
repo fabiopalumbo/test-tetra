@@ -8,7 +8,7 @@ const s3 = new AWS.S3();
 function createReadline(Bucket, Key) {
 
     // s3 read stream
-    const input = S3
+    const input = s3
         .getObject({
             Bucket,
             Key
@@ -26,7 +26,7 @@ function createReadline(Bucket, Key) {
 // write S3 file
 function createWriteStream(Bucket, Key) {
     const writeStream = new stream.PassThrough()
-    const uploadPromise = S3
+    const uploadPromise = s3
         .upload({
             Bucket,
             Key,
