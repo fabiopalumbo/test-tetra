@@ -5,7 +5,7 @@ Transform: AWS::Serverless-2016-10-31
 
 Globals:
   Function:
-    PermissionsBoundary: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/${AppId}-${AWS::Region}-PermissionsBoundary'
+    PermissionsBoundary: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/${candidatename}-${AWS::Region}-PermissionsBoundary'
 
 Parameters:    
   candidatename:
