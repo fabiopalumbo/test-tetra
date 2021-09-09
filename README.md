@@ -94,6 +94,7 @@ Operation                     LogicalResourceId             ResourceType        
 + Add                         snsTopic                      AWS::SNS::Topic               N/A
 ---------------------------------------------------------------------------------------------------------------------
 
+
 ```
 
 
