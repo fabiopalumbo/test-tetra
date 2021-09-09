@@ -63,7 +63,7 @@ exports.lambdaS3Handler = async (event, context) => {
             Message: 'This is a sample message',
             Subject: 'Test SNS From Lambda',
             TopicArn: process.env.SNS_ARN
-          };
+        };
 
         const src_bucket    = event.Records[0].s3.bucket.name;        
         const src_key       = event.Records[0].s3.object.key;

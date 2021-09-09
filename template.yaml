@@ -26,10 +26,9 @@ Resources:
       DeadLetterQueue:
         Type: SQS
         TargetArn: !GetAtt deadQueue.Arn
-      # Environment:
-      #   Variables:
-      #     BUCKET_NAME: !Ref bucket
-      #     SNS_ARN: !GetAtt snsTopic.Arn
+      Environment:
+        Variables:
+          SNS_ARN: !GetAtt snsTopic.Arn
       Policies:
         - SQSSendMessagePolicy:
             QueueName: !GetAtt deadQueue.QueueName      
