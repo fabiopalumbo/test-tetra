@@ -3,10 +3,6 @@ Description: >-
   Lambda-S3 starter project
 Transform: AWS::Serverless-2016-10-31
 
-Globals:
-  Function:
-    PermissionsBoundary: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/${candidatename}-${AWS::Region}-PermissionsBoundary'
-
 Parameters:    
   candidatename:
     Description: Candidate First Name 
