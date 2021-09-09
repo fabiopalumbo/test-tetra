@@ -24,7 +24,7 @@ An S3 Object Lambda, converting YAML <-> Json
 
 ## Introduction
 
-Fetching and transforming data from S3 using AWS Lambda is one of the most common serverless patterns. The new S3 Object Lambda feature allows a Lambda to be invoked on demand as part of the lifecycle of S3 GetObject. This opens up a new set of possibilities. Objects can be transformed, filtered and generated on the fly without adding higher level access points like API Gateways.
+Fetching and transforming data from S3 using AWS Lambda is one of the most common serverless patterns. The new S3 Object Lambda feature allows a Lambda to be invoked on demand as part of the lifecycle of S3 PutObject. This opens up a new set of possibilities. Objects can be transformed, filtered and generated on the fly without adding higher level access points like API Gateways.
 
 ## Diagram
 ![Diagram](diagram.png "Diagram")
