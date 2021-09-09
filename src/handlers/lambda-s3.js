@@ -46,12 +46,6 @@ function convertJson(line) {
     return line
 }
 
-// event.inputBucket: source file bucket
-// event.inputKey: source file key
-// event.outputBucket: target file bucket
-// event.outputKey: target file key
-// event.limit: maximum number of lines to read
-
 exports.lambdaS3Handler = async (event, context) => {
     const getObjectRequests = event.Records.map(async (record) => {
         const params = {
@@ -64,6 +58,7 @@ exports.lambdaS3Handler = async (event, context) => {
             Subject: 'Test SNS From Lambda',
             TopicArn: process.env.SNS_ARN
         };
+        //console.log(event) Ref. https://docs.aws.amazon.com/AmazonS3/latest/userguide/notification-content-structure.html
 
         const src_bucket    = event.Records[0].s3.bucket.name;        
         const src_key       = event.Records[0].s3.object.key;
